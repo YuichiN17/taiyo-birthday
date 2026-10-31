@@ -20,7 +20,7 @@ h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(62px,16vw,112p
 .date{display:flex;align-items:center;justify-content:center;gap:14px;width:85%;font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(21px,5.4vw,36px);letter-spacing:.035em;white-space:nowrap}.date:before,.date:after{content:'';height:1px;background:#ffffffa8;flex:1}
 .video-screen{display:none;position:absolute;inset:0;background:#181410;flex-direction:column;align-items:center;justify-content:center;padding:12px 12px 16px;gap:12px}
 .stage.playing .video-screen{display:flex}.stage.playing .art,.stage.playing .content{display:none}
-.video-screen iframe{width:min(100%,calc((100vh - 100px)*9/16));height:auto;aspect-ratio:9/16;border:0;background:#000;max-height:calc(100% - 65px)}
+
 .actions{display:flex;justify-content:space-between;align-items:center;width:100%;gap:10px;font:14px system-ui,sans-serif}
 .actions button,.actions a{color:#fff;border:1px solid #ffffff66;background:#ffffff1c;border-radius:8px;padding:9px 12px;text-decoration:none;font:inherit}
 .hint{font:12px/1.4 system-ui,sans-serif;color:#e9dfd7;text-align:center}
@@ -41,7 +41,7 @@ h1{font-size:clamp(54px,15vw,92px)}
 .greeting{font-size:clamp(30px,8vw,49px);margin-bottom:10px}
 .date{font-size:clamp(18px,5vw,29px)}
 .video-screen{padding:10px 8px 12px;gap:8px}
-.video-screen iframe{width:100%;height:auto;max-height:calc(100% - 83px);aspect-ratio:9/16}
+
 .actions{font-size:12px;gap:6px}
 .actions button,.actions a{padding:8px 9px}
 .hint{font-size:11px}
@@ -56,6 +56,21 @@ html,body{width:100%;min-height:100%;margin:0;background:#806c5d}
 @media(min-width:700px){.stage{max-width:520px;margin:0 auto}.content{padding-bottom:6%}body{background:#f6f0e6}}
 @media(max-height:680px){.content{padding-bottom:3%}h1{font-size:clamp(42px,12vw,70px)}.subtitle{margin:5px 0 7px}.rule{margin-bottom:7px}.play{width:58px;height:58px}.movie{margin:7px 0;min-height:40px}.greeting{font-size:clamp(26px,7vw,40px);margin-bottom:5px}.date{font-size:clamp(17px,4.6vw,26px)}}
 .video-screen{padding-bottom:max(12px,env(safe-area-inset-bottom))}
+
+/* Local MP4 player: restrained controls, no Google Drive UI. */
+.video-screen{padding:0;background:#000;gap:0;justify-content:center}
+.video-wrap{position:relative;width:100%;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden}
+.video-wrap video{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;background:#000}
+.video-toggle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:64px;height:64px;border:1px solid #ffffff80;border-radius:50%;background:#0008;color:white;font-size:24px;opacity:0;transition:opacity .2s;pointer-events:none}
+.video-wrap:has(video:paused) .video-toggle,.video-wrap:focus-within .video-toggle{opacity:1;pointer-events:auto}
+.video-wrap video:paused + .video-toggle{opacity:1;pointer-events:auto}
+.video-controls{width:100%;display:flex;align-items:center;gap:9px;padding:10px 12px max(14px,env(safe-area-inset-bottom));background:#161616;color:#fff;font:12px system-ui,sans-serif}
+.video-controls button{color:white;background:transparent;border:1px solid #ffffff65;border-radius:6px;padding:7px 9px;white-space:nowrap;font:inherit}
+.video-controls input[type=range]{min-width:0;flex:1;accent-color:#e9d5b9}
+.video-controls #time{white-space:nowrap;font-variant-numeric:tabular-nums}
+.video-screen .hint{padding:8px;background:#111;color:white}
+.video-screen .hint a{color:#fff}
+.video-wrap:fullscreen{background:#000}.video-wrap:fullscreen video{object-fit:contain}
 </style></head><body>
 <main class="stage" id="stage" aria-label="TAIYO 1st Birthday">
 <div class="art" role="img" aria-label="太陽の写真を集めたモザイクアート"></div>
@@ -65,22 +80,49 @@ html,body{width:100%;min-height:100%;margin:0;background:#806c5d}
 <button class="movie" id="movie"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="2" y="3" width="20" height="18" rx="1"/><path d="M7 3v18M17 3v18M2 8h5m-5 8h5m10-8h5m-5 8h5"/></svg>1st Birthday Movie</button>
 <p class="greeting">Happy 1st Birthday</p><div class="date">2026.11.02</div>
 </section>
-<section class="video-screen" aria-label="動画再生画面"><iframe id="player" title="TAIYO 1st Birthday Movie" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
-<div class="actions"><button id="back">← 戻る</button><a id="open" href="#" target="_blank" rel="noopener noreferrer">動画を別画面で開く ↗</a></div><div class="hint">再生されない場合は「動画を別画面で開く」を押してね。</div></section>
+<section class="video-screen" aria-label="動画再生画面">
+<div class="video-wrap" id="videoWrap">
+<video id="player" playsinline webkit-playsinline preload="metadata" aria-label="TAIYO 1st Birthday Movie"><source src="./taiyo.mp4" type="video/mp4">お使いのブラウザは動画再生に対応していません。</video>
+<button class="video-toggle" id="videoToggle" aria-label="再生・一時停止">Ⅱ</button>
+</div>
+<div class="video-controls"><button id="back" aria-label="トップ画面に戻る">← 戻る</button><input id="seek" type="range" min="0" max="1000" value="0" aria-label="再生位置"><span id="time" aria-live="off">0:00 / 0:00</span><button id="fullscreen" aria-label="全画面表示">⛶</button></div>
+<div class="hint" id="videoHint" hidden>動画を再生できませんでした。<a href="./taiyo.mp4" target="_blank" rel="noopener noreferrer">動画を開く</a></div>
+</section>
 </main>
 <script>
-// ▼ ここだけ変更：Googleドライブの動画ファイルIDを入力
-const DRIVE_FILE_ID = '1XUDe9gInVn5NYkbiDOmJTFs4xdpXzq6k';
-const stage=document.getElementById('stage');const player=document.getElementById('player');
-const link=document.getElementById('open');
-function showVideo(){
- if(!DRIVE_FILE_ID || DRIVE_FILE_ID.includes('ここに')){alert('動画のGoogleドライブIDが未設定です。HTMLのDRIVE_FILE_IDを変更してください。');return;}
- const url='https://drive.google.com/file/d/'+encodeURIComponent(DRIVE_FILE_ID)+'/preview';
- link.href='https://drive.google.com/file/d/'+encodeURIComponent(DRIVE_FILE_ID)+'/view';
- player.src=url;stage.classList.add('playing');
+const stage=document.getElementById('stage');
+const player=document.getElementById('player');
+const toggle=document.getElementById('videoToggle');
+const seek=document.getElementById('seek');
+const time=document.getElementById('time');
+const wrap=document.getElementById('videoWrap');
+const hint=document.getElementById('videoHint');
+const formatTime=t=>Number.isFinite(t)?Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0'):'0:00';
+function sync(){
+ const duration=player.duration;
+ seek.value=Number.isFinite(duration)&&duration>0?Math.round(player.currentTime/duration*1000):0;
+ time.textContent=formatTime(player.currentTime)+' / '+formatTime(duration);
+ toggle.textContent=player.paused?'▶':'Ⅱ';
+ toggle.setAttribute('aria-label',player.paused?'再生':'一時停止');
 }
-function back(){player.src='about:blank';stage.classList.remove('playing')}
+function playPause(){if(player.paused){player.play().catch(()=>{toggle.textContent='▶';});}else{player.pause();}sync();}
+function showVideo(){stage.classList.add('playing');hint.hidden=true;player.play().catch(()=>{sync();});sync();}
+function back(){player.pause();player.currentTime=0;stage.classList.remove('playing');sync();}
 document.getElementById('play').addEventListener('click',showVideo);
 document.getElementById('movie').addEventListener('click',showVideo);
 document.getElementById('back').addEventListener('click',back);
+toggle.addEventListener('click',playPause);
+player.addEventListener('click',playPause);
+player.addEventListener('timeupdate',sync);
+player.addEventListener('loadedmetadata',sync);
+player.addEventListener('play',sync);
+player.addEventListener('pause',sync);
+player.addEventListener('ended',sync);
+player.addEventListener('error',()=>{hint.hidden=false;sync();});
+seek.addEventListener('input',()=>{if(Number.isFinite(player.duration))player.currentTime=seek.value/1000*player.duration;});
+document.getElementById('fullscreen').addEventListener('click',()=>{
+ if(document.fullscreenElement){document.exitFullscreen?.();}
+ else if(wrap.requestFullscreen){wrap.requestFullscreen().catch(()=>{});}
+ else if(player.webkitEnterFullscreen){player.webkitEnterFullscreen();}
+});
 </script></body></html>
